@@ -1,0 +1,269 @@
+/* ─────────────────────────────────────────────────────────────
+   全屏播放器
+   颜色全部来自封面（--c1…--c4，FullPlayer 写进来），不跟壁纸。
+   深浅：data-light="true" 浅底深字，否则深底白字。
+   按钮玻璃的浓度、磨砂跟随「外观」里的 --glass-alpha / --glass-blur。
+   ───────────────────────────────────────────────────────────── */
+
+.fp {
+  --ink: #fff;
+  --ink-2: rgba(255, 255, 255, 0.64);
+  --ink-3: rgba(255, 255, 255, 0.52);
+  --trk: rgba(255, 255, 255, 0.22);
+  --bar: rgba(255, 255, 255, 0.88);
+  --btn: rgba(255, 255, 255, calc(var(--glass-alpha) * 0.4));
+  --on-bg: rgba(255, 255, 255, 0.92);
+  --on-ink: #21182f;
+  --hair: rgba(255, 255, 255, 0.14);
+
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--c3) 55%, #120c1c);
+  transform: translateY(104%);
+  visibility: hidden;
+  transition: transform var(--dur-slow) var(--spring), visibility 0s linear var(--dur-slow);
+  -webkit-user-select: none;
+  user-select: none;
+}
+.fp[data-open="true"] {
+  transform: translateY(0);
+  visibility: visible;
+  transition: transform var(--dur-slow) var(--spring), visibility 0s;
+}
+.fp[data-light="true"] {
+  --ink: #4f3a3e;
+  --ink-2: rgba(79, 58, 62, 0.62);
+  --ink-3: rgba(79, 58, 62, 0.5);
+  --trk: rgba(79, 58, 62, 0.14);
+  --bar: rgba(79, 58, 62, 0.78);
+  --btn: rgba(255, 255, 255, calc(var(--glass-alpha) * 1.4));
+  --on-bg: #4f3a3e;
+  --on-ink: #fff;
+  --hair: rgba(79, 58, 62, 0.1);
+  background: color-mix(in srgb, var(--c1) 30%, #fff8f6);
+}
+.fp button { color: inherit; }
+
+/* 封面色的流动背景：两层大色块慢慢转 */
+.fp-bg { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+.fp-bg i { position: absolute; left: -50%; width: 200%; height: 90%; animation: fp-spin 24s linear infinite; }
+.fp-bg i:first-child {
+  top: -20%;
+  background:
+    radial-gradient(30% 40% at 30% 50%, var(--c1), transparent 70%),
+    radial-gradient(30% 40% at 72% 40%, var(--c2), transparent 70%);
+}
+.fp-bg i:last-child {
+  top: 30%;
+  animation-duration: 32s;
+  animation-direction: reverse;
+  background:
+    radial-gradient(34% 40% at 40% 50%, var(--c3), transparent 70%),
+    radial-gradient(28% 36% at 70% 60%, var(--c4), transparent 70%);
+}
+.fp-bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(14, 10, 28, 0.12), rgba(14, 10, 28, 0.42)); }
+.fp[data-light="true"] .fp-bg::after {
+  background: radial-gradient(circle at 2px 2px, rgba(214, 165, 168, 0.25) 1.2px, transparent 1.8px) 0 0 / 24px 24px, rgba(255, 250, 248, 0.25);
+}
+@keyframes fp-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .fp-bg i { animation: none; } }
+
+.fp > :not(.fp-bg) { position: relative; z-index: 1; }
+
+/* 顶部：拖动条 + 收起 + 他也在听 */
+.fp-top { flex: none; padding: calc(max(var(--safe-top), 24px) + 6px) 24px 0; touch-action: none; }
+.fp-grabber { display: block; width: 38px; height: 5px; margin: 0 auto 10px; border-radius: 999px; background: var(--trk); }
+.fp-topbar { display: flex; align-items: center; justify-content: space-between; }
+.fp-btn {
+  width: 36px; height: 36px; flex: none;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  background: var(--btn);
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur));
+}
+.fp-btn svg { width: 20px; height: 20px; stroke-width: 2.4; }
+.fp-btn--sm { width: 34px; height: 34px; }
+.fp-btn--sm svg { width: 18px; height: 18px; }
+.fp-btn-space { width: 36px; }
+.fp-love[aria-pressed="true"] { color: #f2577f; }
+.fp-love[aria-pressed="true"] svg { fill: currentColor; }
+.fp-together {
+  height: 32px; padding: 0 12px 0 4px;
+  display: inline-flex; align-items: center; gap: 8px;
+  border-radius: 999px;
+  font: 600 13px/1 var(--font);
+  background: var(--btn);
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur));
+}
+.fp-together .eq { display: flex; align-items: flex-end; gap: 2px; height: 11px; }
+
+/* 封面：暂停时缩小一圈 */
+.fp-art-wrap { flex: 1; min-height: 0; display: grid; place-items: center; padding: 8px 32px; touch-action: none; }
+.fp-art {
+  width: min(calc(100vw - 64px), 42dvh, 380px);
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 18px;
+  box-shadow: 0 30px 50px -20px rgba(0, 0, 0, 0.55);
+  transform: scale(0.8);
+  transition: transform var(--dur-slow) var(--spring), box-shadow var(--dur-slow) var(--ease-out);
+}
+.fp-art[data-playing="true"] { transform: scale(1); }
+.fp-art[data-playing="false"] { box-shadow: 0 14px 24px -16px rgba(0, 0, 0, 0.4); }
+.fp-art--empty { display: block; background: var(--btn); }
+
+/* 歌词 / 队列时顶部的小封面 */
+.fp-head { flex: none; display: flex; align-items: center; gap: 12px; padding: 18px 24px 4px; }
+.fp-head__art { width: 58px; height: 58px; flex: none; border-radius: 10px; object-fit: cover; box-shadow: 0 8px 18px -8px rgba(0, 0, 0, 0.5); }
+
+.fp-title { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.fp-title b, .fp-title span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fp-title b { font: 700 22px/1.25 var(--font); letter-spacing: -0.01em; }
+.fp-title span { margin-top: 2px; font: 400 19px/1.3 var(--font); color: var(--ink-2); }
+.fp-title--sm b { font-size: 17px; }
+.fp-title--sm span { font-size: 15px; margin-top: 0; }
+
+/* 底部控制区 */
+.fp-panel { flex: none; padding: 0 32px calc(var(--safe-bottom) + 24px); }
+.fp-title-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+
+/* 进度条 / 音量条：苹果那种没有圆点、按住变粗的条。
+   滑块本身透明但很大（iOS Safari 只能拖滑块，不能点条），条的填充用 --p 画 */
+.fp-scrub {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 28px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  touch-action: none;
+}
+.fp-scrub::-webkit-slider-runnable-track {
+  height: 7px;
+  border-radius: 999px;
+  background: linear-gradient(var(--bar), var(--bar)) 0 0 / var(--p) 100% no-repeat, var(--trk);
+  transition: height var(--dur-fast) var(--ease-out);
+}
+.fp-scrub:active::-webkit-slider-runnable-track { height: 12px; }
+.fp-scrub::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 28px; margin-top: -10.5px; border-radius: 50%; background: transparent; }
+.fp-scrub:active::-webkit-slider-thumb { margin-top: -8px; }
+.fp-scrub::-moz-range-track { height: 7px; border-radius: 999px; background: var(--trk); }
+.fp-scrub::-moz-range-progress { height: 7px; border-radius: 999px; background: var(--bar); }
+.fp-scrub::-moz-range-thumb { width: 28px; height: 28px; border: 0; background: transparent; }
+.fp-scrub:focus-visible { outline: 2px solid var(--ink-2); outline-offset: 2px; border-radius: 999px; }
+
+.fp-times {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: -2px;
+  font: 600 12px/1 var(--font);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-3);
+}
+.fp-device { display: inline-flex; align-items: center; gap: 4px; }
+.fp-device svg { width: 13px; height: 13px; }
+
+.fp-controls { display: flex; align-items: center; justify-content: space-around; margin-top: 10px; }
+.fp-controls button { width: 64px; height: 64px; display: grid; place-items: center; border-radius: 50%; }
+.fp-controls svg { width: 38px; height: 38px; fill: currentColor; stroke-width: 1; }
+.fp-controls .fp-play { width: 76px; height: 76px; }
+.fp-controls .fp-play svg { width: 48px; height: 48px; }
+
+.fp-volume { display: flex; align-items: center; gap: 12px; margin-top: 10px; color: var(--ink-3); }
+.fp-volume svg { width: 18px; height: 18px; flex: none; }
+
+.fp-tabs { display: flex; justify-content: space-around; margin-top: 16px; }
+.fp-tabs button, .fp-tabs__device { width: 46px; height: 40px; display: grid; place-items: center; border-radius: 12px; color: var(--ink-3); }
+.fp-tabs svg { width: 22px; height: 22px; }
+.fp-tabs button[aria-pressed="true"] { color: var(--on-ink); background: var(--on-bg); }
+
+/* 歌词 */
+.fp-lyrics {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding: 0 28px;
+  -webkit-mask: linear-gradient(180deg, transparent 0, #000 10%, #000 82%, transparent 100%);
+  mask: linear-gradient(180deg, transparent 0, #000 10%, #000 82%, transparent 100%);
+}
+.fp-lyrics--empty { display: grid; place-items: center; font: var(--t-callout); color: var(--ink-2); -webkit-mask: none; mask: none; }
+.fp-lyrics__track { padding: 28px 0 50%; transition: transform 0.7s var(--spring); }
+.fp-line {
+  display: block;
+  width: 100%;
+  margin-bottom: 22px;
+  text-align: left;
+  font: 800 28px/1.22 var(--font-round);
+  letter-spacing: -0.01em;
+  opacity: calc(0.42 - var(--d) * 0.04);
+  filter: blur(calc(var(--d) * 0.6px));
+  transform: scale(0.96);
+  transform-origin: left center;
+  transition: opacity 0.4s var(--ease-out), filter 0.4s var(--ease-out), transform var(--dur-slow) var(--spring);
+}
+.fp-line[data-state="past"] { opacity: 0.32; }
+.fp-line[data-state="current"] { opacity: 1; filter: none; transform: none; }
+.fp-mark {
+  display: inline-flex; align-items: center; gap: 3px;
+  height: 22px; margin-left: 6px; padding: 0 8px;
+  vertical-align: middle;
+  border-radius: 999px;
+  font: 700 11.5px/1 var(--font);
+  letter-spacing: 0;
+  color: #fff;
+  background: #f58fab;
+}
+.fp-mark svg { width: 10px; height: 10px; fill: currentColor; stroke: none; }
+
+/* 队列 */
+.fp-queue { flex: 1; min-height: 0; overflow-y: auto; padding: 14px 20px 8px; -webkit-overflow-scrolling: touch; }
+.fp-modes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.fp-modes button {
+  height: 40px;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  border-radius: 12px;
+  font: 600 14px/1 var(--font);
+  background: var(--btn);
+}
+.fp-modes svg { width: 17px; height: 17px; }
+.fp-modes button[aria-pressed="true"] { color: var(--on-ink); background: var(--on-bg); }
+.fp-queue__head { display: flex; align-items: baseline; gap: 8px; margin: 18px 4px 6px; }
+.fp-queue__head b { font: 700 18px/1.3 var(--font); }
+.fp-queue__head span { font: var(--t-caption); color: var(--ink-2); }
+.fp-queue__empty { margin: 16px 4px; font: var(--t-callout); color: var(--ink-2); }
+.fp-qrow { width: 100%; display: flex; align-items: center; gap: 12px; padding: 7px 4px; text-align: left; border-bottom: 0.5px solid var(--hair); }
+.fp-qrow img, .fp-qrow .fp-art--empty { width: 44px; height: 44px; flex: none; border-radius: 8px; object-fit: cover; }
+.fp-qrow__text { flex: 1; min-width: 0; }
+.fp-qrow__title { display: flex; align-items: center; gap: 6px; }
+.fp-qrow__title b { font: 600 15.5px/1.3 var(--font); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fp-qrow__sub { display: block; font: var(--t-caption); color: var(--ink-2); }
+.fp-qrow__dur { font: 500 12.5px/1 var(--font); font-variant-numeric: tabular-nums; color: var(--ink-3); }
+.fp-tag {
+  flex: none;
+  height: 19px; padding: 0 7px;
+  display: inline-flex; align-items: center;
+  border-radius: 999px;
+  font: 700 11px/1 var(--font);
+  color: #fff;
+  background: #f58fab;
+}
+
+/* ── 一首歌的操作菜单（TrackActions，在 Sheet 里，跟随全局玻璃配色） ── */
+.ta-list { display: flex; flex-direction: column; gap: 4px; padding-bottom: 8px; }
+.ta-row { width: 100%; min-height: 52px; display: flex; align-items: center; gap: 14px; padding: 6px 4px; text-align: left; border-radius: 14px; }
+.ta-row:disabled { opacity: 0.6; }
+.ta-icon { width: 38px; height: 38px; flex: none; display: grid; place-items: center; border-radius: 12px; }
+.ta-icon svg { width: 20px; height: 20px; }
+.ta-cover { width: 38px; height: 38px; flex: none; border-radius: 10px; object-fit: cover; background: var(--fill-2); }
+.ta-label { flex: 1; font: 500 17px/1.3 var(--font); }
+.ta-chev { font-size: 22px; }
+.ta-done { width: 22px; height: 22px; color: var(--accent); }
+.ta-empty { font: var(--t-callout); padding: 8px 4px; }

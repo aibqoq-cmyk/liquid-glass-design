@@ -1,0 +1,142 @@
+/* ─────────────────────────────────────────────────────────────
+   Liquid Companion · 设计令牌
+   所有页面只从这里取颜色、玻璃层级、圆角、动效。改主题只改这一个文件。
+   ───────────────────────────────────────────────────────────── */
+
+:root {
+  /* 环境光：壁纸的平均色（r, g, b）。Wallpaper 组件会实时写入，
+     玻璃边缘的高光会染上这个颜色，看起来像吸收了底下的光。 */
+  --ambient: 120, 160, 220;
+
+  /* 文字 */
+  --text-1: rgba(255, 255, 255, 0.96);
+  --text-2: rgba(255, 255, 255, 0.72);
+  --text-3: rgba(255, 255, 255, 0.48);
+  --text-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+
+  /* 系统色（取 iOS 深色模式数值） */
+  --blue: #0a84ff;
+  --green: #30d158;
+  --orange: #ff9f0a;
+  --red: #ff453a;
+  --pink: #ff6fa8;
+
+  /* 玻璃：用户在「外观」里只调三个值——色调、浓度、磨砂。
+     AppearanceProvider 会把用户的选择实时写进 --glass-tint / --glass-alpha / --glass-blur，
+     薄/厚两档自动按比例跟随，不用单独配。 */
+  --glass-tint: 60, 82, 118;          /* r, g, b */
+  --glass-alpha: 0.40;                /* 0.15 – 0.70 */
+  --glass-blur: 26px;                 /* 6px – 44px */
+  --glass-thin-tint: var(--glass-tint);
+  --glass-thin-alpha: calc(var(--glass-alpha) * 0.55);
+  --glass-thin-blur: calc(var(--glass-blur) * 0.65);
+  --glass-thick-tint: var(--glass-tint);
+  --glass-thick-alpha: min(0.85, calc(var(--glass-alpha) + 0.16));
+  --glass-thick-blur: calc(var(--glass-blur) * 1.25);
+  /* 深色玻璃（全屏播放器、命令行输出）不跟随用户色调 */
+  --glass-dark-tint: 28, 30, 36;      --glass-dark-alpha: 0.62;  --glass-dark-blur: 30px;
+  --glass-sat: 170%;
+
+  /* 用户自己发出去的消息气泡颜色（外观里可换） */
+  --bubble: #0a84ff;
+
+  /* 语义色：深色玻璃（白字）的默认值。浅色壁纸时整组被下面的 [data-glass="light"] 覆盖 */
+  --accent: #ff8fb1;
+  --track: rgba(255, 255, 255, 0.22);       /* 进度条底、开关关闭态 */
+  --bar-fill: rgba(255, 255, 255, 0.95);    /* 进度条填充 */
+  --hairline: rgba(255, 255, 255, 0.22);    /* 列表分隔线 */
+  --fill-1: rgba(255, 255, 255, 0.10);      /* 卡片内次级块 */
+  --fill-2: rgba(255, 255, 255, 0.16);
+  --tab-on: rgba(255, 255, 255, 0.24);      /* 导航选中泡 */
+  --badge-bg: rgba(255, 255, 255, 0.92);
+  --badge-ink: #0e1a33;
+  --code-bg: rgba(0, 0, 0, 0.22);           /* 命令行输出底 */
+  --sticker: rgba(255, 255, 255, 0.55);     /* 壁纸贴纸线条 */
+  --shadow-glass: 0 10px 30px -14px rgba(0, 0, 0, 0.38);
+
+  /* 圆角 */
+  --r-xs: 10px;
+  --r-sm: 16px;
+  --r-md: 24px;
+  --r-lg: 30px;
+  --r-pill: 999px;
+
+  /* 间距（4 的倍数） */
+  --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px;
+  --s-5: 20px; --s-6: 24px; --s-8: 32px; --s-10: 40px;
+
+  /* 页面左右留白，与参考图一致 */
+  --gutter: 20px;
+
+  /* 字体：iPhone 上直接用系统的 SF Pro / 苹方 */
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+          "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+  --font-round: ui-rounded, "SF Pro Rounded", var(--font);
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* 字号阶梯（iOS 动态字体的 Large 档） */
+  --t-large-title: 700 34px/1.12 var(--font);
+  --t-title: 700 26px/1.2 var(--font);
+  --t-headline: 600 20px/1.3 var(--font);
+  --t-body: 400 17px/1.45 var(--font);
+  --t-callout: 400 15px/1.4 var(--font);
+  --t-caption: 400 13px/1.35 var(--font);
+  --t-number: 700 40px/1 var(--font-round);
+
+  /* 动效：弹簧曲线。按压、切换、弹层都用它 */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast: 180ms;
+  --dur: 320ms;
+  --dur-slow: 520ms;
+
+  /* 安全区（刘海 / 灵动岛 / Home 条） */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  /* 底部浮层高度，页面内容要给它们让位 */
+  --tabbar-h: 76px;
+  --miniplayer-h: 64px;
+}
+
+/* 浅色玻璃：壁纸（或用户选的玻璃色）够亮时，AppearanceProvider 给 <html> 加 data-glass="light"。
+   奶白玻璃 + 深暖棕字 + 粉色点缀。所有组件只读变量，自动切换，不用改组件。 */
+:root[data-glass="light"] {
+  --text-1: #4f3a3e;
+  --text-2: #8f7176;
+  --text-3: #b9a2a6;
+  --text-shadow: none;
+  --accent: #f58fab;
+  --track: rgba(160, 120, 125, 0.22);
+  --bar-fill: #5e4448;
+  --hairline: rgba(160, 120, 125, 0.22);
+  --fill-1: rgba(160, 120, 125, 0.10);
+  --fill-2: rgba(160, 120, 125, 0.14);
+  --tab-on: rgba(255, 255, 255, 0.9);
+  --badge-bg: #f58fab;
+  --badge-ink: #ffffff;
+  --code-bg: rgba(160, 120, 125, 0.10);
+  --sticker: #d2a5a4;
+  --shadow-glass: 0 14px 30px -18px rgba(176, 110, 124, 0.55);
+}
+
+/* Safari 17.2+ 支持 linear()：用真正的弹簧曲线替代 cubic-bezier 近似 */
+@supports (transition-timing-function: linear(0, 1)) {
+  :root {
+    --spring: linear(
+      0, 0.009, 0.035 2.1%, 0.141, 0.281 6.7%, 0.723 12.9%, 0.938 16.7%, 1.017,
+      1.077, 1.121, 1.149 24.3%, 1.159, 1.163, 1.161, 1.154 29.9%, 1.129 32.8%,
+      1.051 39.6%, 1.017 43.1%, 0.991, 0.977 51%, 0.974 53.8%, 0.975 57.1%,
+      0.997 69.8%, 1.003 76.9%, 1
+    );
+  }
+}
+
+/* 用户在系统里开了"减弱动态效果"：全部动效降为淡入淡出 */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --spring: var(--ease-out);
+    --dur: 1ms;
+    --dur-slow: 1ms;
+  }
+}

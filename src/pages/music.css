@@ -1,0 +1,158 @@
+.mu-page { padding-top: calc(var(--safe-top) + 52px); }
+.mu-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.mu-device { display: inline-flex; align-items: center; gap: 6px; font: var(--t-caption); white-space: nowrap; }
+.mu-device .eq { display: flex; align-items: flex-end; gap: 2px; height: 13px; color: var(--accent); }
+
+.mu-search { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+.mu-search .search { flex: 1; height: 44px; padding: 0 16px; }
+.mu-search .search svg { width: 18px; height: 18px; }
+.mu-search .search input { font-size: 16px; }   /* 16px 以下 iOS 会自动放大页面 */
+.mu-cancel { font: 600 16px/1 var(--font); color: var(--accent); }
+
+.mu-h2 { display: flex; align-items: baseline; gap: 8px; margin: 26px 0 12px; font: 700 22px/1.25 var(--font); }
+.mu-h2 .muted { font: var(--t-caption); }
+.mu-empty { margin: 24px 0; text-align: center; font: var(--t-callout); }
+
+/* 长按出菜单：别让 iOS 弹系统的放大镜 / 图片菜单 */
+.mu-tile, .mu-result { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+
+/* 一起听 */
+.mu-together { margin-top: 16px; padding: 16px; border-radius: 28px; }
+.mu-together__row { display: flex; align-items: center; gap: 12px; }
+.mu-pair { display: flex; flex: none; }
+.mu-pair > :last-child { margin-left: -10px; }
+.mu-together__text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.mu-together__text b { font: 600 16px/1.3 var(--font); }
+.mu-together__text .muted { font: var(--t-caption); }
+.mu-chip { flex: none; height: 32px; padding: 0 10px 0 12px; display: inline-flex; align-items: center; gap: 2px; border-radius: 999px; font: 600 13.5px/1 var(--font); }
+.mu-chip svg { width: 15px; height: 15px; }
+.mu-comment { margin-top: 12px; padding: 12px 14px; border-radius: 4px 18px 18px 18px; font: 400 15px/1.5 var(--font); }
+.mu-comment .muted { display: block; margin-top: 4px; font: var(--t-caption); }
+
+/* 他为你挑的 */
+.mu-picks { position: relative; width: 100%; display: flex; gap: 14px; padding: 14px; border-radius: 28px; text-align: left; }
+.mu-stack { position: relative; width: 132px; height: 132px; flex: none; }
+.mu-stack img { position: absolute; border-radius: 14px; object-fit: cover; box-shadow: 0 8px 16px -10px rgba(0, 0, 0, 0.5); }
+.mu-stack img[data-i="0"] { inset: 10px 0 0 14px; width: calc(100% - 14px); height: calc(100% - 10px); transform: rotate(7deg); }
+.mu-stack img[data-i="1"] { inset: 4px 8px 6px 6px; width: calc(100% - 14px); height: calc(100% - 10px); transform: rotate(-4deg); }
+.mu-stack img[data-i="2"] { inset: 0 14px 12px 0; width: calc(100% - 14px); height: calc(100% - 12px); box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 0.6); }
+.mu-picks__text { flex: 1; min-width: 0; display: flex; flex-direction: column; padding-right: 36px; }
+.mu-picks__text b { font: 700 19px/1.3 var(--font-round); }
+.mu-picks__text .muted { margin-top: 2px; font: var(--t-caption); }
+/* 小纸条：和记忆页的便签同一种纸，不透明，不跟玻璃变色 */
+.mu-paper {
+  position: relative;
+  align-self: flex-start;
+  margin-top: auto;
+  padding: 10px 10px 8px;
+  border-radius: 3px 3px 12px 3px;
+  font: 400 13.5px/1.45 var(--font);
+  color: #5e4448;
+  text-shadow: none;
+  background: #fff3b8;
+  transform: rotate(-2deg);
+  box-shadow: 0 8px 14px -10px rgba(120, 80, 60, 0.6);
+}
+.mu-paper::before { content: ""; position: absolute; top: -6px; left: 50%; width: 34px; height: 11px; margin-left: -17px; transform: rotate(-3deg); background: rgba(255, 255, 255, 0.65); }
+.mu-picks__play {
+  position: absolute; top: 14px; right: 14px;
+  width: 36px; height: 36px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  color: var(--badge-ink);
+  background: var(--badge-bg);
+}
+:root[data-glass="light"] .mu-picks__play { color: #fff; background: var(--text-1); }
+.mu-picks__play svg { width: 15px; height: 15px; fill: currentColor; }
+
+/* 最近播放：横着滑 */
+.mu-recent {
+  display: flex; gap: 14px;
+  margin: 0 calc(-1 * var(--gutter));
+  padding: 0 var(--gutter) 6px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: var(--gutter);
+  scrollbar-width: none;
+}
+.mu-recent::-webkit-scrollbar { display: none; }
+.mu-tile { flex: none; width: 128px; display: flex; flex-direction: column; text-align: left; scroll-snap-align: start; }
+.mu-tile__art, .mu-list__art { position: relative; display: block; aspect-ratio: 1; }
+.mu-tile__art { width: 128px; }
+.mu-tile__art img, .mu-list__art img, .mu-art-empty {
+  display: block; width: 100%; height: 100%;
+  object-fit: cover;
+  border-radius: 16px;
+  background: var(--fill-2);
+  box-shadow: 0 12px 22px -14px rgba(0, 0, 0, 0.55);
+}
+.mu-list__art img, .mu-list__art .mu-art-empty { border-radius: 20px; }
+.mu-tile__title { display: block; margin-top: 8px; font: 600 14.5px/1.3 var(--font); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mu-tile__sub { display: block; font: var(--t-caption); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mu-badge {
+  position: absolute; left: 8px; bottom: 8px;
+  height: 22px; padding: 0 8px;
+  display: inline-flex; align-items: center; gap: 4px;
+  border-radius: 999px;
+  font: 700 11px/1 var(--font);
+  color: #5e4448;
+  text-shadow: none;
+  background: rgba(255, 255, 255, 0.86);
+}
+.mu-badge svg { width: 11px; height: 11px; color: #f58fab; fill: currentColor; stroke: none; }
+.mu-badge--corner { left: auto; bottom: auto; top: 10px; right: 10px; }
+
+/* 歌单 */
+.mu-lists { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.mu-list { display: flex; flex-direction: column; text-align: left; }
+.mu-list .mu-tile__title { font-size: 15px; }
+.mu-list--new {
+  aspect-ratio: 1;
+  align-items: center; justify-content: center; gap: 6px;
+  border: 1.5px dashed var(--track);
+  border-radius: 20px;
+  font: 600 15px/1 var(--font);
+  color: var(--text-2);
+}
+.mu-list--new svg { width: 26px; height: 26px; }
+
+/* 他划的歌词 */
+.mu-marks { display: flex; flex-direction: column; gap: 10px; }
+.mu-mark { width: 100%; padding: 14px 16px; border-radius: 22px; text-align: left; }
+.mu-mark__line { display: block; font: 700 18px/1.45 var(--font-round); }
+.mu-mark__from { display: flex; align-items: center; gap: 8px; margin-top: 8px; font: 400 12.5px/1.3 var(--font); }
+.mu-mark__from img { width: 18px; height: 18px; border-radius: 5px; object-fit: cover; }
+
+/* 搜索结果 */
+.mu-scopes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.mu-scopes button {
+  height: 32px; padding: 0 14px;
+  border-radius: 999px;
+  font: 600 14px/1 var(--font);
+  background: var(--fill-2);
+}
+.mu-scopes button[aria-pressed="true"] { color: var(--badge-ink); text-shadow: none; background: var(--badge-bg); }
+:root[data-glass="light"] .mu-scopes button[aria-pressed="true"] { color: #fff; background: var(--text-1); }
+.mu-result-list { margin-top: 14px; padding: 6px 0; border-radius: 26px; }
+.mu-result { width: 100%; display: flex; align-items: center; gap: 12px; padding: 8px 14px; text-align: left; }
+.mu-result img, .mu-result .mu-art-empty { width: 48px; height: 48px; flex: none; border-radius: 10px; object-fit: cover; box-shadow: 0 6px 12px -8px rgba(0, 0, 0, 0.5); }
+.mu-result [data-kind="artist"] { border-radius: 50%; }
+.mu-result__text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.mu-result__text b { font: 600 16px/1.3 var(--font); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mu-result__text .muted { margin-top: 2px; font: 400 13.5px/1.3 var(--font); }
+.mu-kind { flex: none; height: 22px; padding: 0 8px; display: inline-flex; align-items: center; border-radius: 999px; font: 700 11.5px/1 var(--font); color: var(--text-2); background: var(--fill-2); }
+.mu-kind[data-kind="playlist"] { color: #fff; text-shadow: none; background: #f58fab; }
+.mu-hint { margin: 12px 4px 0; font: var(--t-caption); line-height: 1.6; }
+
+/* 新建歌单 */
+.mu-new input {
+  width: 100%;
+  height: 52px;
+  padding: 0 16px;
+  border: 0;
+  outline: none;
+  font: 400 17px/1 var(--font);
+  color: inherit;
+}
+.mu-new-btn { margin-top: 16px; background: var(--accent); box-shadow: 0 10px 22px -10px color-mix(in srgb, var(--accent) 90%, transparent); }
+.mu-new-btn:disabled { opacity: 0.5; }
